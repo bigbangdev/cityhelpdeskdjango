@@ -1,0 +1,22 @@
+---
+- name: install letsencrypt
+  apt: name={{item}} state=latest
+  become: yes
+  with_items:
+      - letsencrypt
+
+- name: create letsencrypt directory
+  file: name={{app_root}}/letsencrypt state=directory
+
+- name: create letsencrypt certificate
+  shell: letsencrypt certonly -n --webroot -w {{app_root}} -m {{ letsencrypt_email }} --agree-tos -d {{ domain_name }}
+  args:
+    creates: /etc/letsencrypt/live/{{ domain_name }}
+  notify:
+    - restart nginx
+
+- name: add letsencrypt cronjob for cert renewal
+  cron:
+    name: letsencrypt_renewal
+    special_time: weekly
+    job: letsencrypt --renew certonly -n --webroot -w {{app_root}} -m {{ letsencrypt_email }} --agree-tos -d {{ domain_name }} && /bin/systemctl nginx reload

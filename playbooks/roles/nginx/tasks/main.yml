@@ -1,0 +1,39 @@
+---
+- name: Update apt-get
+  apt: update_cache=yes
+  become: yes
+
+- name: Upgrade apt-get
+  action: apt upgrade=dist
+  become: yes
+
+- name: Install nginx
+  apt: name={{item}} state=installed
+  become: yes
+  with_items:
+      - nginx
+
+- name: Configure nginx
+  become: yes
+  template:
+    force: yes
+    src: ../files/{{ nginx_template | default('vagrant_nginx_site_conf.j2') }}
+    dest: /etc/nginx/sites-available/{{app_name}}
+
+- name: Create symlink
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/{{app_name}}
+    dest: /etc/nginx/sites-enabled/{{app_name}}
+    state: link
+
+- name: Create symlink
+  become: yes
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify:
+    - restart nginx
+
+- include: letsencrypt.yml
+  when: nginx_template is defined

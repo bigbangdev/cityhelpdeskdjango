@@ -1,0 +1,30 @@
+---
+- name: Own {{app_root}}/logs/celery.log
+  become: yes
+  file: path={{app_root}}/logs/celery.log owner=django group=django mode=ug=rwx,o=r state=touch
+
+- name: Create /etc/celery
+  become: yes
+  file: path=/etc/celery state=directory
+
+- name: Configure celery
+  become: yes
+  template:
+    force: yes
+    src: ../files/celery.conf.j2
+    dest: /etc/celery/celery
+    mode: 644
+
+- name: Register Celery service
+  become: yes
+  template:
+    force: yes
+    src: ../files/celery.service.j2
+    dest: /etc/systemd/system/celery.service
+    backup: yes
+    owner: root
+    group: root
+    mode: 644
+  notify:
+    - reload systemctl
+    - restart celery

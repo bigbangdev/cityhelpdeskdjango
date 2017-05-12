@@ -1,0 +1,31 @@
+---
+- hosts: all
+  gather_facts: False
+  become: true
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+- hosts: dev
+  become: true
+  roles:
+    - common # Installs apt-get packages and users
+    - database
+    - celery
+    - redis
+    - nginx
+
+- hosts: dev
+  tasks:
+  - name: Update virtual environment
+    become: yes
+    pip:
+      executable: pip3
+      requirements: '{{app_root}}/requirements.txt'
+      state: latest
+  - name: copy enviroment file
+    become: yes
+    template:
+      src: '{{env_file}}'
+      dest: '{{app_root}}/.env'
+

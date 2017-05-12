@@ -1,0 +1,4 @@
+---
+- name: Create {{app_root}}/logs
+  become: yes
+  file: path={{app_root}}/logs owner=django group=django state=directory mode=ug=rwx,o=r

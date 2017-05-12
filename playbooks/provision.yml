@@ -1,0 +1,26 @@
+---
+- hosts: all
+  gather_facts: False
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+- hosts: uniserver
+  roles:
+    - common # Installs apt-get packages and users
+    - database
+    - redis
+    - nginx
+    - gunicorn # Sets up gunicorn service for production
+    - celery
+    - django # fetches code
+  handlers:
+    - include: roles/gunicorn/handlers/main.yml
+    - include: roles/celery/handlers/main.yml
+
+# This should be ran for production
+# - hosts: dev
+#   gather_facts: no
+#   tasks:
+#     - include: roles/gunicorn/handlers/main.yml
+#     - include: roles/celery/handlers/main.yml

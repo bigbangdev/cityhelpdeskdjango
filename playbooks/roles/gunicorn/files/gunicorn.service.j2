@@ -1,0 +1,22 @@
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+PIDFile=/run/gunicorn/pid
+User=django
+Group=django
+RuntimeDirectory=gunicorn
+WorkingDirectory={{app_root}}/{{app_name}}
+ExecStart=/usr/bin/gunicorn --pid /run/gunicorn/pid   \
+            --name={{app_name}} \
+		    --bind=127.0.0.1:{{port}} \
+		    --config {{app_root}}/gunicorn.py \
+		    {{app_name}}.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

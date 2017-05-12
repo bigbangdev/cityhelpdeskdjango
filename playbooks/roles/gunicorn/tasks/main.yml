@@ -1,0 +1,27 @@
+---
+- name: Own gunicorn.log
+  become: yes
+  file: path={{app_root}}/logs/gunicorn.log owner=django group=django mode=ug=rwx,o=r state=touch
+
+- name: Set gunicorn config
+  become: yes
+  template:
+    force: yes
+    src: ../files/gunicorn.py.j2
+    dest: '{{app_root}}/gunicorn.py'
+    backup: yes
+    mode: 0775
+
+- name: Register Django task
+  become: yes
+  template:
+    force: yes
+    src: ../files/gunicorn.service.j2
+    dest: /etc/systemd/system/gunicorn.service
+    backup: yes
+    owner: root
+    group: root
+    mode: 644
+  notify:
+    - reload systemctl
+    - restart gunicorn

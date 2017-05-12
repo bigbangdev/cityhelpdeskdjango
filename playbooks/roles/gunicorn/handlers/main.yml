@@ -1,0 +1,10 @@
+---
+- name: reload systemctl
+  command: systemctl daemon-reload
+
+- name: restart gunicorn
+  become: yes
+  systemd:
+    name: gunicorn
+    enabled: yes
+    state: restarted

@@ -1,0 +1,22 @@
+---
+- name: Update code to {{ref|default("master")}}
+  become: yes
+  become_user: django
+  git:
+    key_file: /home/django/.ssh/id_rsa
+    accept_hostkey: yes
+    repo: git@github.com:jeffstern/GWCLoop_Backend.git
+    dest: '{{app_root}}/{{app_name}}'
+    update: yes
+    force: yes
+    version: '{{ref|default("master")}}'
+  notify:
+    - restart gunicorn
+    - restart celery
+
+- name: Update virtual environment
+  become: yes
+  pip:
+    executable: pip3
+    requirements: '{{app_root}}/requirements.txt'
+    state: latest

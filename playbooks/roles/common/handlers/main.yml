@@ -1,0 +1,10 @@
+---
+- name: update apt
+  become: yes
+  apt: update_cache=yes
+
+- name: restart rsyslog
+  become: yes
+  service:
+    name: rsyslog
+    state: restarted

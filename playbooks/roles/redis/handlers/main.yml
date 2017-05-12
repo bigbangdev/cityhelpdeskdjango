@@ -1,0 +1,10 @@
+---
+- name: reload systemctl
+  command: systemctl daemon-reload
+
+- name: restart redis
+  become: yes
+  systemd:
+    name: redis-server
+    enabled: yes
+    state: restarted

@@ -1,0 +1,51 @@
+---
+- name: Create redis group
+  become: yes
+  group:
+    name: redis
+    state: present
+
+- name: Create redis user
+  become: yes
+  user:
+    name: redis
+    createhome: no
+    groups: redis
+    state: present
+
+- file:
+    path: /var/lib/redis
+    state: directory
+    owner: redis
+    group: redis
+    mode: 0755
+
+- name: Install redis-server
+  become: yes
+  apt: name=redis-server state=installed
+
+- name: Create /etc/redis
+  become: yes
+  file: path=/etc/redis state=directory
+
+- name: Configure redis
+  become: yes
+  template:
+    force: yes
+    src: ../files/redis.conf.j2
+    dest: /etc/redis/redis.conf
+    mode: 0644
+
+- name: Add redis-server service
+  become: yes
+  template:
+    force: yes
+    src: ../files/redis-server.service.j2
+    dest: /etc/systemd/system/redis.service
+    backup: yes
+    owner: root
+    group: root
+    mode: 644
+  notify:
+    - reload systemctl
+    - restart redis

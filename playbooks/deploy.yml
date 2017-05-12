@@ -1,0 +1,25 @@
+---
+- hosts: django
+  gather_facts: no
+  tasks:
+    - include: roles/django/tasks/deploy.yml
+    - include: roles/django/tasks/env.yml
+  handlers:
+    - include: roles/gunicorn/handlers/main.yml
+    - include: roles/celery/handlers/main.yml
+
+- hosts: maint
+  gather_facts: no
+  tasks:
+    - name: Run migrations
+      become: yes
+      become_user: django
+      shell: . {{app_root}}/{{app_name}}/manage.py migrate
+    - name: Collect static files
+      become: yes
+      become_user: django
+      shell: . {{app_root}}/{{app_name}}/manage.py collectstatic --no-input
+    - name: reload cron
+      become: yes
+      become_user: django
+      shell: . {{app_root}}/{{app_name}}/manage.py crontab add

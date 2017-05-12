@@ -1,0 +1,25 @@
+- name: Create django group
+  become: yes
+  group:
+    name: django
+    state: present
+
+- name: Create django user
+  become: yes
+  user:
+    name: django
+    groups: django
+    createhome: yes
+    state: present
+
+- name: Create django .ssh
+  become: yes
+  file: path={{app_root}}/.ssh owner=django group=django mode=u+rwx,go-rwx state=directory
+
+- name: Install private key
+  become: yes
+  copy: src={{extern_files}}/id_rsa dest={{app_root}}/.ssh/id_rsa owner=django group=django mode=u=rw,go-rwx
+
+- name: Install public key
+  become: yes
+  copy: src={{extern_files}}/id_rsa.pub dest={{app_root}}/.ssh/id_rsa.pub owner=django group=django mode=u=rw,go=r
