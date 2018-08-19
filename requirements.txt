@@ -22,7 +22,7 @@ greenlet==0.4.10
 gunicorn==19.6.0
 Markdown==2.6.2
 openpyxl==2.4.2
-Pillow==3.3.0
+Pillow==3.3.2
 requests==2.10.0
 sendgrid==2.2.1
 sendgrid-django==2.0.0
